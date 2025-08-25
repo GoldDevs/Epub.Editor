@@ -1,7 +1,11 @@
 import re
+from typing import TYPE_CHECKING
 from bs4 import BeautifulSoup
 
-from epub_editor_pro.core.epub_model import EpubBook
+from epsilon_editor.core.epub_model import EpubBook
+
+if TYPE_CHECKING:
+    from epsilon_editor.core.search_models import SearchResult
 
 
 class ReplaceEngine:
@@ -87,3 +91,49 @@ class ReplaceEngine:
         for find, replace in operations:
             total_replacements += self.replace_all(find, replace, case_sensitive, whole_word, regex)
         return total_replacements
+
+    def replace_single(self, search_result: "SearchResult", replace_text: str) -> int:
+        """
+        Replaces a single occurrence of a match in the EPUB content.
+
+        Args:
+            search_result: The SearchResult object for the match to replace.
+            replace_text: The text to replace with.
+
+        Returns:
+            The number of replacements made (should be 1 if successful).
+        """
+        content_manager = self.book.content_manager
+        try:
+            content = content_manager.get_content(search_result.item_href)
+            soup = BeautifulSoup(content, "lxml")
+            text_nodes = soup.find_all(string=True)
+
+            if search_result.node_index >= len(text_nodes):
+                return 0  # Node index out of bounds
+
+            node_to_replace = text_nodes[search_result.node_index]
+
+            original_text = node_to_replace.string
+
+            # Re-verify that the match is still present at the expected location
+            if original_text[search_result.match_start:search_result.match_end] != search_result.match_text:
+                # The content might have changed since the search.
+                # A more robust implementation might re-search the node.
+                return 0
+
+            new_text = (
+                original_text[:search_result.match_start] +
+                replace_text +
+                original_text[search_result.match_end:]
+            )
+
+            node_to_replace.string.replace_with(new_text)
+
+            new_html = soup.prettify(encoding="utf-8")
+            content_manager.update_content(search_result.item_href, new_html)
+            self.book.is_modified = True
+            return 1
+
+        except (FileNotFoundError, KeyError, IndexError):
+            return 0

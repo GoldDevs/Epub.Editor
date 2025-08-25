@@ -4,7 +4,7 @@ from textual.widgets import Header, Footer, Input, Checkbox, Button
 from textual.containers import VerticalScroll, Horizontal
 from textual.message import Message
 
-from epub_editor_pro.ui.material_components import Card
+from epsilon_editor.ui.material_components import Card
 
 
 class ReplaceScreen(Screen):

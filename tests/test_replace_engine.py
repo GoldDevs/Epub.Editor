@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from epub_editor_pro.core.replace_engine import ReplaceEngine
-from epub_editor_pro.core.epub_model import EpubBook, ManifestItem
+from epsilon_editor.core.replace_engine import ReplaceEngine
+from epsilon_editor.core.epub_model import EpubBook, ManifestItem
 
 
 class TestReplaceEngine(unittest.TestCase):

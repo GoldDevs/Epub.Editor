@@ -52,5 +52,5 @@ class EpubBook:
     is_modified: bool = False
 
     def __post_init__(self):
-        from epub_editor_pro.core.content_manager import ContentManager
+        from epsilon_editor.core.content_manager import ContentManager
         self.content_manager = ContentManager(self)

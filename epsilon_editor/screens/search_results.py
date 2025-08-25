@@ -3,7 +3,7 @@ from textual.screen import Screen
 from textual.widgets import Header, Footer, ListView, ListItem, Label
 from textual.containers import VerticalScroll
 
-from epub_editor_pro.core.search_models import SearchResult
+from epsilon_editor.core.search_models import SearchResult
 
 
 class SearchResultItem(ListItem):
@@ -15,13 +15,18 @@ class SearchResultItem(ListItem):
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the list item."""
-        yield Label(f"{self.result.file_path}:{self.result.line_number}", classes="file-path")
-        # The rich text markup is not working as expected here.
-        # I will fix this in a later step.
-        yield Label(
-            f"{self.result.context_before}{self.result.match_text}{self.result.context_after}",
-            classes="context"
+        yield Label(f"{self.result.file_path}", classes="file-path")
+
+        context_before = self.result.context[:self.result.match_start]
+        match_text = self.result.match_text
+        context_after = self.result.context[self.result.match_end:]
+
+        # Use Textual's rich text markup for highlighting
+        highlighted_context = (
+            f"{context_before}[b u reverse]{match_text}[/b u reverse]{context_after}"
         )
+
+        yield Label(highlighted_context, classes="context")
 
 
 class SearchResultsScreen(Screen):

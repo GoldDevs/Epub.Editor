@@ -3,7 +3,7 @@ from textual.screen import Screen
 from textual.widgets import Header, Footer, Static
 from textual.containers import VerticalScroll
 
-from epub_editor_pro.ui.material_components import Card
+from epsilon_editor.ui.material_components import Card
 
 
 class HelpScreen(Screen):
@@ -36,7 +36,7 @@ class HelpScreen(Screen):
 
             # It's better to manage bindings in a more central way, but for now,
             # we will also list the dashboard bindings as they are important.
-            from epub_editor_pro.screens.dashboard import Dashboard
+            from epsilon_editor.screens.dashboard import Dashboard
             keybindings_text += "\nDashboard Keybindings:\n"
             for binding in Dashboard.BINDINGS:
                 keybindings_text += f"- {binding.key}: {binding.description}\n"

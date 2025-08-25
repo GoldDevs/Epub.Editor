@@ -3,7 +3,7 @@ from textual.screen import Screen
 from textual.widgets import Header, Footer, Static, Switch
 from textual.containers import VerticalScroll
 
-from epub_editor_pro.ui.material_components import Card
+from epsilon_editor.ui.material_components import Card
 
 
 class SettingsScreen(Screen):

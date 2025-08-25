@@ -2,7 +2,7 @@ import zipfile
 import os
 from pathlib import Path
 
-from epub_editor_pro.core.epub_model import EpubBook
+from epsilon_editor.core.epub_model import EpubBook
 
 
 class EpubSaver:

@@ -1,6 +1,6 @@
 from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.widgets import Header, Footer, Button, ListView, ListItem, Input
+from textual.widgets import Header, Footer, Button, ListView, ListItem, Input, Checkbox
 from textual.containers import VerticalScroll, Horizontal
 from textual.message import Message
 from typing import List, Tuple
@@ -30,8 +30,17 @@ class BatchOperationsScreen(Screen):
 
     class BatchOperationsInitiated(Message):
         """Posted when batch operations are initiated."""
-        def __init__(self, operations: List[Tuple[str, str]]) -> None:
+        def __init__(
+            self,
+            operations: List[Tuple[str, str]],
+            case_sensitive: bool,
+            whole_word: bool,
+            regex: bool,
+        ) -> None:
             self.operations = operations
+            self.case_sensitive = case_sensitive
+            self.whole_word = whole_word
+            self.regex = regex
             super().__init__()
 
     def compose(self) -> ComposeResult:
@@ -39,6 +48,12 @@ class BatchOperationsScreen(Screen):
         yield Header()
         with VerticalScroll(id="batch-body"):
             yield ListView(id="batch-list")
+            yield Horizontal(
+                Checkbox("Case-sensitive", id="case-sensitive-checkbox"),
+                Checkbox("Whole word", id="whole-word-checkbox"),
+                Checkbox("Regex", id="regex-checkbox"),
+                id="batch-options"
+            )
         yield Footer()
         yield Horizontal(
             Button("Add Row", id="add-row-button"),
@@ -67,7 +82,14 @@ class BatchOperationsScreen(Screen):
             # Filter out empty operations
             operations = [op for op in operations if op[0]]
             if operations:
-                self.post_message(self.BatchOperationsInitiated(operations))
+                case_sensitive = self.query_one("#case-sensitive-checkbox", Checkbox).value
+                whole_word = self.query_one("#whole-word-checkbox", Checkbox).value
+                regex = self.query_one("#regex-checkbox", Checkbox).value
+                self.post_message(
+                    self.BatchOperationsInitiated(
+                        operations, case_sensitive, whole_word, regex
+                    )
+                )
             else:
                 self.app.notify("No operations to perform.", title="Warning", severity="warning")
         elif event.button.id == "cancel-button":

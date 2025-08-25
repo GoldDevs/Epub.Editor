@@ -3,7 +3,7 @@ import zipfile
 import shutil
 from pathlib import Path
 
-from epub_editor_pro.core.epub_loader import EpubLoader, InvalidEpubFileError
+from epsilon_editor.core.epub_loader import EpubLoader, InvalidEpubFileError
 
 
 class TestEpubLoader(unittest.TestCase):

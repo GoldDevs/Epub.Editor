@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from epub_editor_pro.core.search_engine import SearchEngine
-from epub_editor_pro.core.epub_model import EpubBook, ManifestItem
+from epsilon_editor.core.search_engine import SearchEngine
+from epsilon_editor.core.epub_model import EpubBook, ManifestItem
 
 
 class TestSearchEngine(unittest.TestCase):

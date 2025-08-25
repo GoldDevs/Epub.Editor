@@ -4,8 +4,8 @@ from textual.widgets import Header, Footer, Label
 from textual.containers import VerticalScroll
 from textual.binding import Binding
 
-from epub_editor_pro.ui.material_components import Card, Button
-from epub_editor_pro.ui.layout_manager import LayoutManager, ResponsiveGrid
+from epsilon_editor.ui.material_components import Card, Button
+from epsilon_editor.ui.layout_manager import LayoutManager, ResponsiveGrid
 
 
 class Dashboard(Screen):

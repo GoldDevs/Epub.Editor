@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Optional, Dict, List
 from lxml import etree
 
-from epub_editor_pro.core.epub_model import EpubBook, EpubMetadata, ManifestItem, SpineItem
+from epsilon_editor.core.epub_model import EpubBook, EpubMetadata, ManifestItem, SpineItem
 
 log = logging.getLogger(__name__)
 

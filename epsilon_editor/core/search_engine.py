@@ -2,8 +2,8 @@ import re
 from typing import Iterator
 from bs4 import BeautifulSoup
 
-from epub_editor_pro.core.epub_model import EpubBook
-from epub_editor_pro.core.search_models import SearchResult
+from epsilon_editor.core.epub_model import EpubBook
+from epsilon_editor.core.search_models import SearchResult
 
 
 class SearchEngine:
@@ -29,21 +29,18 @@ class SearchEngine:
         try:
             content = self.book.content_manager.get_content(item.href)
             soup = BeautifulSoup(content, "lxml")
-            text_lines = soup.get_text().splitlines()
+            text_nodes = soup.find_all(string=True)
 
-            for i, line in enumerate(text_lines):
-                for match in search_pattern.finditer(line):
-                    context_before = line[:match.start()]
-                    match_text = match.group(0)
-                    context_after = line[match.end() :]
-
+            for i, node in enumerate(text_nodes):
+                for match in search_pattern.finditer(node):
                     yield SearchResult(
                         file_path=item.href,
-                        line_number=i + 1,
-                        match_text=match_text,
-                        context_before=context_before,
-                        context_after=context_after,
                         item_href=item.href,
+                        node_index=i,
+                        match_start=match.start(),
+                        match_end=match.end(),
+                        match_text=match.group(0),
+                        context=node,
                     )
         except (FileNotFoundError, KeyError):
             pass

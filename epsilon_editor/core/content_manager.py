@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Dict, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from epub_editor_pro.core.epub_model import EpubBook
+    from epsilon_editor.core.epub_model import EpubBook
 
-from epub_editor_pro.core.epub_model import ManifestItem
+from epsilon_editor.core.epub_model import ManifestItem
 
 
 class ContentManager:

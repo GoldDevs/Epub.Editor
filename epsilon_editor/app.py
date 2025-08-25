@@ -1,17 +1,18 @@
 from textual.app import App
+from textual.widgets import ListView
 
-from epub_editor_pro.core.epub_model import EpubBook
-from epub_editor_pro.screens.file_manager import FileManager
-from epub_editor_pro.screens.dashboard import Dashboard
-from epub_editor_pro.screens.search import SearchScreen
-from epub_editor_pro.screens.search_results import SearchResultsScreen
-from epub_editor_pro.screens.replace import ReplaceScreen
-from epub_editor_pro.screens.settings import SettingsScreen
-from epub_editor_pro.screens.batch_operations import BatchOperationsScreen
-from epub_editor_pro.screens.help import HelpScreen
-from epub_editor_pro.core.search_engine import SearchEngine
-from epub_editor_pro.core.replace_engine import ReplaceEngine
-from epub_editor_pro.core.epub_saver import EpubSaver
+from epsilon_editor.core.epub_model import EpubBook
+from epsilon_editor.screens.file_manager import FileManager
+from epsilon_editor.screens.dashboard import Dashboard
+from epsilon_editor.screens.search import SearchScreen
+from epsilon_editor.screens.search_results import SearchResultsScreen
+from epsilon_editor.screens.replace import ReplaceScreen
+from epsilon_editor.screens.settings import SettingsScreen
+from epsilon_editor.screens.batch_operations import BatchOperationsScreen
+from epsilon_editor.screens.help import HelpScreen
+from epsilon_editor.core.search_engine import SearchEngine
+from epsilon_editor.core.replace_engine import ReplaceEngine
+from epsilon_editor.core.epub_saver import EpubSaver
 
 
 class EpsilonApp(App):
@@ -32,6 +33,7 @@ class EpsilonApp(App):
         ("d", "toggle_dark", "Toggle dark mode"),
         ("q", "quit", "Quit"),
         ("f1", "show_help", "Help"),
+        ("ctrl+s", "save_book", "Save Book"),
     ]
 
     def action_show_help(self) -> None:
@@ -53,7 +55,7 @@ class EpsilonApp(App):
 
     def on_file_manager_file_selected(self, event: FileManager.FileSelected) -> None:
         """Handle file selection from the FileManager."""
-        from epub_editor_pro.core.epub_loader import EpubLoader, InvalidEpubFileError
+        from epsilon_editor.core.epub_loader import EpubLoader, InvalidEpubFileError
         try:
             loader = EpubLoader(event.path)
             self.book = loader.load()
@@ -97,25 +99,43 @@ class EpsilonApp(App):
             self.notify("No EPUB loaded.", title="Error", severity="error")
             return
 
-        if not event.replace_all:
-            self.notify(
-                "Single replace is not implemented yet. Please use 'Replace All'.",
-                title="Info",
-                severity="information",
-            )
-            return
-
         try:
             replace_engine = ReplaceEngine(self.book)
-            num_replacements = replace_engine.replace_all(
-                event.find,
-                event.replace,
-                event.case_sensitive,
-                event.whole_word,
-                event.regex
-            )
-            self.notify(f"Made {num_replacements} replacements.", title="Replace Complete")
-            self.pop_screen()  # Go back to dashboard
+            if event.replace_all:
+                num_replacements = replace_engine.replace_all(
+                    event.find,
+                    event.replace,
+                    event.case_sensitive,
+                    event.whole_word,
+                    event.regex
+                )
+                self.notify(f"Made {num_replacements} replacements.", title="Replace Complete")
+                self.pop_screen()  # Go back to dashboard
+            else:
+                # Handle single replace
+                if not isinstance(self.app.screen_stack[-2], SearchResultsScreen):
+                    self.notify("Single replace can only be used from the search results screen.", title="Error", severity="error")
+                    return
+
+                search_results_screen = self.app.screen_stack[-2]
+                list_view = search_results_screen.query_one("#results-list", ListView)
+                if list_view.highlighted is None:
+                    self.notify("No search result selected.", title="Warning", severity="warning")
+                    return
+
+                selected_item = list_view.highlighted
+                search_result = selected_item.result
+
+                num_replacements = replace_engine.replace_single(search_result, event.replace)
+
+                if num_replacements > 0:
+                    self.notify("Replacement successful.", title="Success")
+                    # Remove the item from the list view and the search results
+                    list_view.remove_child(selected_item.id)
+                    self.search_results.remove(search_result)
+                else:
+                    self.notify("Replacement failed. The content may have changed.", title="Error", severity="error")
+
         except ValueError as e:
             self.notify(str(e), title="Replace Error", severity="error")
         except Exception as e:
@@ -131,13 +151,11 @@ class EpsilonApp(App):
 
         try:
             replace_engine = ReplaceEngine(self.book)
-            # Note: The BatchOperationsScreen currently doesn't have controls for these options.
-            # Hardcoding them to False for now. This can be a future enhancement.
             num_replacements = replace_engine.batch_replace_all(
                 operations=event.operations,
-                case_sensitive=False,
-                whole_word=False,
-                regex=False,
+                case_sensitive=event.case_sensitive,
+                whole_word=event.whole_word,
+                regex=event.regex,
             )
             self.notify(
                 f"Made {num_replacements} replacements in batch operation.",
